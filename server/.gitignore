@@ -7,6 +7,10 @@
 # contract/build
 /contract/build
 
+# auth
+auth.json
+MyContractAddress.json
+
 
 
 
