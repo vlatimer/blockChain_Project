@@ -1,0 +1,12 @@
+# dependencies
+/node_modules
+
+# build
+/dist
+
+# contract/build
+/contract/build
+
+
+
+

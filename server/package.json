@@ -1,0 +1,23 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && node dist/index.js",
+    "compile:deploy": "solcjs -o contract/build --bin contract/myContract.sol && solcjs -o contract/build --abi contract/myContract.sol && node src/deploy.cjs",
+    "deploy": "node src/deploy.cjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "@types/node": "^22.10.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "web3": "^4.15.0",
+    "web3-core": "^4.7.1"
+  }
+}
