@@ -125,6 +125,12 @@ router.get('/order/:id', async (req: Request, res: Response) => {
 router.get('/orders', async (req: Request, res: Response) => {
   const response = await getOrders(contractData)
   console.log(`LOG ${response.status}: Get orders`);
+  
+  if(req.query.filter === "creator"){
+    response.response = response.response.filter((o) => o.creator.publicKey === req.query.account)
+  } else if(req.query.filter === "employee"){
+    response.response = response.response.filter((o) => o.employee.publicKey === req.query.account)
+  }
 
   res.status(200).json(response);
 })
