@@ -6,7 +6,6 @@ import closeLogo from '../../../images/close.png'
 
 export function CreateOrder({ store, auth, dispatch, setCreating }){
   const form = useRef();
-  const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
   const [payment, setPayment] = useState('');
 
@@ -21,7 +20,6 @@ export function CreateOrder({ store, auth, dispatch, setCreating }){
     }
 
     try {
-      setLoading(true);
 
       const response = await fetch(`http://localhost:8080/api/order`, {
         method: 'POST',
@@ -40,7 +38,6 @@ export function CreateOrder({ store, auth, dispatch, setCreating }){
     } catch(error){
       console.error('Failed to fetch');
     }finally{
-      setLoading(false);
       setCreating(false);
     }
   }, [form, auth, dispatch, setCreating]);

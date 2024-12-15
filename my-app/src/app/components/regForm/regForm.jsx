@@ -1,19 +1,18 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { getFormData } from '../../helper';
 
-export function RegForm({setAuth}){
+export function RegForm({setAuth, setLoading}){
   const navigate = useNavigate();
-  const form = useRef();
-  const [loading, setLoading] = useState(false);
+
   const [loginValue, setLogin] = useState('');
 
   const regUser = useCallback(async (e) => {
     e.preventDefault();
 
+    setLoading(true);
     const formData = getFormData(e);
     try {
-      setLoading(true);
 
       const response = await fetch(`http://localhost:8080/api/auth`, {
         method: 'POST',
@@ -29,12 +28,12 @@ export function RegForm({setAuth}){
         setAuth(data.data.name, data.data.publicKey, true) && navigate('/home');
       }
 
-    } catch(error){
+    } catch(error) {
       console.error('Failed to fetch');
-    }finally{
+    } finally {
       setLoading(false);
     }
-  }, [form, setAuth, navigate]);
+  }, [setAuth, navigate, setLoading]);
 
   function inputChange(event){
     setLogin(event.target.value);
@@ -42,8 +41,7 @@ export function RegForm({setAuth}){
 
   return (
     <>
-    {loading ? (<p>Загрузка</p>) : 
-        (<form className="reg__form form" ref={form} onSubmit={(e) => regUser(e)}>
+      <form className="reg__form form" onSubmit={(e) => regUser(e)}>
         <h1 className="form__header">Регистрация</h1>
         <div className="form__ui">
           <input
@@ -59,8 +57,7 @@ export function RegForm({setAuth}){
               disabled={ loginValue.trim() ? false : true }
               value='Отправить'/>
         </div>
-        </form>)
-        }
+      </form>
     </>
   )
 }

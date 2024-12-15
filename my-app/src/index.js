@@ -11,10 +11,9 @@ reactRoot.render(
 )
 
 //PLAN:
-// Create order
 // Accept order
 // Submit order
-// My accepted orders & Orders i created
+// See my balance
 // ------------------
 // Account
 // Auth error on styles

@@ -1,4 +1,4 @@
-export function Order({ order, dispatch }) {
+export function Order({ order, dispatch, isMy }) {
   const { name, payment } = order;
 
   return (
@@ -7,7 +7,13 @@ export function Order({ order, dispatch }) {
         <h2>{name}</h2>
         <p>Оплата за услугу: <span>{payment}</span>TKN</p>
       </div>
-      <button className='order__submit'>Принять заказ</button>
+        <button className={!isMy ? 'order__submit' : 'order__my'}>
+          {
+            isMy ?
+            "Ваш заказ" :
+            "Принять заказ"
+          }
+        </button>
     </div>
   )
 }
