@@ -2,7 +2,7 @@ import fs from 'fs';
 import express, {Request, Response} from 'express'
 import { Web3 } from 'web3'
 import { ContractParams } from './interfaces/contract.utils.js';
-import { acceptOrder, balanceOf, buyTokens, completeOrder, createOrder, deleteOrder, getOrderById, getOrders, submitOrder } from './controller.js';
+import { acceptOrder, balanceOf, buyTokens, completeOrder, createOrder, deleteOrder, getOrderById, getOrders, getTransfers, submitOrder } from './controller.js';
 import path from 'path';
 
 const contractAddress = JSON.parse(fs.readFileSync("./MyContractAddress.json", 'utf8')).contractAdddress;
@@ -105,7 +105,7 @@ router.delete('/order/:id', async (req: Request, res: Response) => {
 })
 
 router.get('/balance', async (req: Request, res: Response) => {
-  const account = req.body.account;
+  const account = req.query.account;
 
   const response = await balanceOf(contractData, account)
   console.log(`LOG ${response.status}: Balanceof from ${account}`);
@@ -126,21 +126,63 @@ router.get('/orders', async (req: Request, res: Response) => {
   const response = await getOrders(contractData)
   console.log(`LOG ${response.status}: Get orders`);
   
-  if(req.query.filter === "creator"){
+  if(req.query.filter === "creator") {
     response.response = response.response.filter((o) => o.creator.publicKey === req.query.account)
-  } else if(req.query.filter === "employee"){
+  } else if(req.query.filter === "employee") {
     response.response = response.response.filter((o) => o.employee.publicKey === req.query.account)
+  } else if(req.query.filter == "accessible") {
+    response.response = response.response.filter((o) => {
+      if(!o.employee.publicKey){
+        return true;
+      }
+      if(o.employee.publicKey === req.query.account){
+        return true;
+      }
+      if(o.creator.publicKey === req.query.account){
+        return true;
+      }
+      return false;
+    })
   }
 
   res.status(200).json(response);
 })
 
-router.get('/auth/:name', async (req: Request, res: Response) => {
+router.get('/tickets', async (req: Request, res: Response) => {
+  const response = await getTransfers(contractData)
+  console.log(`LOG ${response.status}: Get tickets`);
+
+  const address = req.query.account;
+  if(!address){
+    res.status(400).json({
+      status: 'failed',
+      message: 'Account must be in URL query'
+    });
+    return;
+  }
+
+  response.response = response.response.filter((t) => {
+    if(t.from.publicKey === address) {
+      return true;
+    }
+    if(t.to.publicKey === address) {
+      return true;
+    }
+    return false;
+  })
+
+  res.status(200).json(response);
+})
+
+router.get('/auth', async (req: Request, res: Response) => {
   try {
-    console.log(`LOG: Trying to find user: ${req.params.name}`);
+    const username = req.query.login;
+    const password = req.query.password;
+    console.log(`LOG: Trying to find user: ${username}`);
+
     const ACCOUNTS = JSON.parse(fs.readFileSync('./auth.json', 'utf8'));
     for(let i = 0;i < ACCOUNTS.length; i++){
-      if(ACCOUNTS[i].username === req.params.name){
+      if(ACCOUNTS[i].username === username && ACCOUNTS[i].password === password){
         res.status(200).json({
           status: 'found',
           data: {
@@ -168,12 +210,14 @@ router.post('/auth', async (req: Request, res: Response) => {
   try {
     const ACCOUNTS = JSON.parse(fs.readFileSync('./auth.json', 'utf8'));
     const username = req.body.login;
+    const password = req.body.password;
 
     console.log(`LOG: Trying to create user: ${username}`);
 
     for(let i = 0;i < ACCOUNTS.length; i++){
       if(!ACCOUNTS[i].username){
         ACCOUNTS[i].username = username;
+        ACCOUNTS[i].password = password;
         res.status(200).json({
           status: 'written',
           data: {

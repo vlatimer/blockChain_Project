@@ -31,6 +31,12 @@ contract Freelance is ERC20 {
         Employee employee;
     }
 
+    struct TransferTicket {
+        address from;
+        address to;
+        uint256 amount;
+    }
+
     event CreateOrderEvent(
         uint256 id,
         string name,
@@ -64,9 +70,11 @@ contract Freelance is ERC20 {
 
 
     uint256 public currentId = 1;
+    uint256 public ticketsId = 1;
     address private contractOwner;
 
     mapping (uint => Order) public store;
+    mapping (uint => TransferTicket) public tickets;
 
     constructor() ERC20("MyToken", "MTK"){
         contractOwner = msg.sender;
@@ -111,6 +119,12 @@ contract Freelance is ERC20 {
             Employee(address(0))
         );
 
+        tickets[ticketsId] = TransferTicket(
+            msg.sender,
+            contractOwner,
+            payment
+        );
+
         emit CreateOrderEvent(
             currentId,
             name,
@@ -128,6 +142,7 @@ contract Freelance is ERC20 {
         );
 
         currentId++;
+        ticketsId++;
 
         return Response({statusCode: 200});
     }
@@ -194,6 +209,12 @@ contract Freelance is ERC20 {
             store[orderId].paymentStatus,
             store[orderId].employee
         );
+   
+        tickets[ticketsId] = TransferTicket(
+            contractOwner,
+            store[orderId].employee.addr,
+            store[orderId].payment
+        );
 
         emit SaveTokenTransaction(
             store[orderId].creator,
@@ -201,6 +222,7 @@ contract Freelance is ERC20 {
             store[orderId].payment
         );
 
+        ticketsId++;
 
         return Response({statusCode: 200});
     }

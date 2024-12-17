@@ -25,6 +25,7 @@ async function deploy() {
 		return {
 			account: account,
 			username: '',
+			password: '',
 		}
 	}).filter((a) => a.account !== defaultAccount));
 	

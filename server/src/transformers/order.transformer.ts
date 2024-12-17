@@ -12,7 +12,7 @@ export class OrderTransformer {
       creator: AddressTransformer.from(order.creator),
       payment: order.payment,
       orderStatus: OrderStatusTransformer.from(order.orderStatus),
-      paymentStatus: PaymentStatusTransformer.from(order.orderStatus),
+      paymentStatus: PaymentStatusTransformer.from(order.paymentStatus),
       employee: AddressTransformer.from(order.employee.addr)
     }
   }
