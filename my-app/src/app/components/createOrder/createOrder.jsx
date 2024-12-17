@@ -2,33 +2,18 @@ import { useCallback, useRef, useState } from "react";
 import { getFormData } from '../../helper';
 import { ADD_ORDER, ADD_TRANSFER } from "../../reducer";
 import closeLogo from '../../../images/close.png'
+import { createOrder } from "../../fetch/order";
 
 
-export function CreateOrder({ store, auth, dispatch, setCreating }){
+export function CreateOrder({ auth, dispatch, setCreating }){
   const form = useRef();
   const [name, setName] = useState('');
   const [payment, setPayment] = useState('');
 
-  const createOrder = useCallback(async (e) => {
+  const handleCreateOrder = useCallback(async (e) => {
     e.preventDefault();
-
-    const obj = {
-      from: auth.publicKey,
-      arguments: {
-        ...getFormData(e),
-      }
-    }
-
     try {
-
-      const response = await fetch(`http://localhost:8080/api/order`, {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(obj),
-      })
-      const data = await response.json();
+      const data = await createOrder(auth, getFormData(e));
       
       if(data.status === "success"){
         dispatch({ type: ADD_ORDER, payload: data.response.order})
@@ -40,20 +25,20 @@ export function CreateOrder({ store, auth, dispatch, setCreating }){
     }finally{
       setCreating(false);
     }
-  }, [form, auth, dispatch, setCreating]);
+  }, [auth, dispatch, setCreating]);
 
   const checkPayment = useCallback(() => {
-    if(isNaN(parseInt(payment, 10))){
-      return true;
+    if(/^\d+$/.test(payment)){
+      return false;
     }
-    return false;
+    return true;
   }, [payment])
 
   return (
     <div className="create-order__box">
-      <form className="create-order__form" ref={form} onSubmit={createOrder}>
+      <form className="create-order__form" ref={form} onSubmit={handleCreateOrder}>
         <button className="xmark" onClick={() => {setCreating(false)}}>
-          <img src={closeLogo}/>
+          <img src={closeLogo} alt="X"/>
         </button>
         <h1>Создать заказ</h1>
         <input

@@ -1,7 +1,7 @@
 import { NoOrders } from "../noOrders/noOrders"
 import { Order } from "../order/order"
 
-export function Main({ store, dispatch, auth }) {
+export function Main({ store, dispatch, auth, setOrderId }) {
   return (
     <div className="content">
       {
@@ -11,7 +11,9 @@ export function Main({ store, dispatch, auth }) {
             return (<Order
                       order={item}
                       key={index}
-                      isMy={item.creator.publicKey === auth.publicKey}
+                      dispatch={dispatch}
+                      auth={auth}
+                      setOrderId={setOrderId}
                     />)
           })}
         </> : <NoOrders/>

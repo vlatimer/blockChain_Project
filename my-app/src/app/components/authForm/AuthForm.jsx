@@ -5,13 +5,14 @@ import { getFormData } from "../../helper";
 export function AuthForm({setAuth, auth, setLoading}){
   const navigate = useNavigate();
   const [loginValue, setLogin] = useState('');
+  const [passwordValue, setPassword] = useState('');
 
   const logInUser = useCallback(async (e) => {
     e.preventDefault();
     setLoading(true);
     const formData = getFormData(e);
     try {
-      const response = await fetch(`http://localhost:8080/api/auth/${formData.login}`, {
+      const response = await fetch(`http://localhost:8080/api/auth?login=${formData.login}&password=${formData.password}`, {
         method: 'GET',
       })
       const data = await response.json();
@@ -29,6 +30,9 @@ export function AuthForm({setAuth, auth, setLoading}){
 
   function inputChange(event){
     setLogin(event.target.value);
+  }
+  function passwordChange(event){
+    setPassword(event.target.value);
   }
 
   useEffect(() => {
@@ -50,9 +54,16 @@ export function AuthForm({setAuth, auth, setLoading}){
             onChange={inputChange}>
           </input>
           <input
+            className="form__input"
+            name="password"
+            placeholder="Пароль"
+            value={passwordValue}
+            onChange={passwordChange}>
+          </input>
+          <input
             className="form__submit"
             type="submit"
-            disabled={ loginValue.trim() ? false : true }
+            disabled={ (loginValue.trim() && passwordValue.trim()) ? false : true }
             value='Отправить'/>
         </div>
       </form>

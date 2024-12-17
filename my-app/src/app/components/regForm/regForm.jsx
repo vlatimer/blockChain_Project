@@ -6,6 +6,7 @@ export function RegForm({setAuth, setLoading}){
   const navigate = useNavigate();
 
   const [loginValue, setLogin] = useState('');
+  const [passwordValue, setPassword] = useState('');
 
   const regUser = useCallback(async (e) => {
     e.preventDefault();
@@ -19,7 +20,10 @@ export function RegForm({setAuth, setLoading}){
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ login: formData.login }),
+        body: JSON.stringify({
+          login: formData.login,
+          password: formData.password,
+        }),
       })
       const data = await response.json();
 
@@ -38,6 +42,9 @@ export function RegForm({setAuth, setLoading}){
   function inputChange(event){
     setLogin(event.target.value);
   }
+  function passwordChange(event) {
+    setPassword(event.target.value);
+  }
 
   return (
     <>
@@ -51,10 +58,17 @@ export function RegForm({setAuth, setLoading}){
               value={loginValue}
               onChange={inputChange}>
             </input>
+          <input
+              className="form__input"
+              name="password"
+              placeholder="Пароль"
+              value={passwordValue}
+              onChange={passwordChange}>
+            </input>
             <input
               className="form__submit"
               type="submit"
-              disabled={ loginValue.trim() ? false : true }
+              disabled={(loginValue.trim() && passwordValue.trim()) ? false : true }
               value='Отправить'/>
         </div>
       </form>

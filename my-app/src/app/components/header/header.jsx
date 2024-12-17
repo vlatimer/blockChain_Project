@@ -3,75 +3,44 @@ import userLogo from '../../../images/user.png'
 import logo from '../../../images/block.png'
 import { useCallback, useState, useEffect } from 'react'
 import { UPLOAD_ORDERS } from '../../reducer'
+import { getOrders } from '../../fetch/order'
+import { Account } from '../account/account'
 
-const ALL = 'all'
+const ALL = 'accessible'
 const CREATOR = 'creator'
 const EMPLOYEE = 'employee'
 
-export function Header({ auth, dispatch, setCreating, setLoading}){
+export function Header({ auth, dispatch, setCreating, setLoading }){
   const [active, setActive] = useState(ALL);
+  const [isAccountOpen, setAccountOpen] = useState(false);
 
-  const getMyOrders = useCallback(async () => {
-    if(active === CREATOR) return;
-
-    setLoading(true);
-    const response = await fetch(`http://localhost:8080/api/orders?account=${auth.publicKey}&filter=creator`, {
-      method: 'GET',
-    })
-    const data = await response.json();
-    console.log(data)
-    if(data.status === "success"){
-      dispatch({type: UPLOAD_ORDERS, payload: data.response});
-      setActive(CREATOR)
-    }
-    setLoading(false);
-  }, [auth, dispatch, active, setActive, setLoading])
-
-  const getAllOrders = useCallback(async () => {
-    if(active === ALL) return;
+  const ordersHandler = useCallback(async (whatActive) => {
+    if(active === whatActive) return;
 
     setLoading(true);
-    const response = await fetch(`http://localhost:8080/api/orders`, {
-      method: 'GET',
-    })
-    const data = await response.json();
-    console.log(data);
-    if(data.status === "success"){
-      dispatch({type: UPLOAD_ORDERS, payload: data.response});
-      setActive(ALL)
-    }
-    setLoading(false);
-  }, [dispatch, active, setActive, setLoading])
 
-  const getWorkOrders = useCallback(async () => {
-    if(active === EMPLOYEE) return;
+    const data = await getOrders(auth, whatActive);
 
-    setLoading(true);
-    const response = await fetch(`http://localhost:8080/api/orders?account=${auth.publicKey}&filter=employee`, {
-      method: 'GET',
-    })
-    const data = await response.json();
-    console.log(data);
-    if(data.status === "success"){
+    if(data.status === "success") {
       dispatch({type: UPLOAD_ORDERS, payload: data.response});
-      setActive(EMPLOYEE)
+      setActive(whatActive)
     }
+
     setLoading(false);
-  }, [auth, dispatch, active, setActive, setLoading])
+  }, [active, setLoading, auth, dispatch, setActive])
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const response = await fetch(`http://localhost:8080/api/orders`, {
-        method: 'GET',
-      })
-      const data = await response.json();
+
+      const data = await getOrders(auth, ALL);
+
       if(data.status === "success"){
         dispatch({type: UPLOAD_ORDERS, payload: data.response});
       }
       setLoading(false);
     })();
-  }, [dispatch, setLoading])
+  }, [auth, dispatch, setLoading])
 
   return (
     <div className='header__box'>
@@ -79,27 +48,29 @@ export function Header({ auth, dispatch, setCreating, setLoading}){
       <div className='header__filters'>
         <button 
           className={'filter__btn ' + (active === ALL ? 'active': '')}
-          onClick={getAllOrders}>
+          onClick={() => ordersHandler(ALL)}>
             Все
         </button>
-        <button 
+        <button
           className={'filter__btn ' + (active === CREATOR ? 'active': '')}
-          onClick={getMyOrders}>
+          onClick={() => ordersHandler(CREATOR)}>
             Мои заказы
         </button>
         <button 
           className={'filter__btn ' + (active === EMPLOYEE ? 'active': '')}
-          onClick={getWorkOrders}>
+          onClick={() => ordersHandler(EMPLOYEE)}>
             Мои работы
         </button>
       </div>
       <div className='header__ui'>
         <button className='header__create' onClick={() => {setCreating(true)}}>Создать заказ</button>
-        <button className='header__account'>
+        <button className='header__account'
+          onClick={() => setAccountOpen(true)}>
           <p>{auth.username}</p>
           <img src={userLogo} alt='пользователь'/>
         </button>
       </div>
+      {isAccountOpen ? <Account auth={auth} setAccountOpen={setAccountOpen}/> : ''}
     </div>
   )
 }

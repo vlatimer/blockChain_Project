@@ -1,13 +1,14 @@
 export const ADD_ORDER = "ADD_ORDER";
 export const ADD_TRANSFER = "ADD_TRANSFER";
 export const UPLOAD_ORDERS = "UPLOAD_ORDERS";
+export const UPDATE_ORDER = "UPDATE_ORDER";
 
 export const todoReducer = (state, action) => {
   switch(action.type){
     case ADD_ORDER:
       return {
         orders: state.orders.concat(
-          { 
+          {
             id: action.payload.id,
             name: action.payload.name,
             payment: action.payload.payment,
@@ -31,6 +32,16 @@ export const todoReducer = (state, action) => {
     case UPLOAD_ORDERS:
       return {
         orders: action.payload,
+        transfers: state.transfers,
+      }
+    case UPDATE_ORDER:
+      return {
+        orders: state.orders.map((order) => {
+          if(order.id === action.payload.id){
+            return action.payload;
+          }
+          return order;
+        }),
         transfers: state.transfers,
       }
   }
